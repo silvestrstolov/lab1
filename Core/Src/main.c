@@ -21,7 +21,6 @@
 #include "main.h"
 #include "adc.h"
 #include "dma.h"
-#include "eth.h"
 #include "usart.h"
 #include "usb_otg.h"
 #include "gpio.h"
@@ -90,7 +89,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_ETH_Init();
   MX_USART3_UART_Init();
   MX_DMA_Init();
   MX_ADC1_Init();
