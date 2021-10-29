@@ -62,7 +62,7 @@ main-build: lab1_proj.elf secondary-outputs
 
 # Tool invocations
 lab1_proj.elf: $(OBJS) $(USER_OBJS) F:\Studying\1_semestr_magistratura\embedded\Dyade4ko\laba1\STM32F429ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "lab1_proj.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"F:\Studying\1_semestr_magistratura\embedded\Dyade4ko\laba1\STM32F429ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="lab1_proj.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "lab1_proj.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"F:\Studying\1_semestr_magistratura\embedded\Dyade4ko\laba1\STM32F429ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="lab1_proj.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
