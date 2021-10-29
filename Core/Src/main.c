@@ -37,6 +37,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define Buff_Size 256
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -48,6 +49,10 @@
 
 /* USER CODE BEGIN PV */
 uint8_t flashing = 1;
+uint8_t Receive_buff[Buff_Size];
+uint8_t UART_Message = 0;
+
+extern DMA_HandleTypeDef hdma_usart3_rx;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -89,8 +94,8 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART3_UART_Init();
   MX_DMA_Init();
+  MX_USART3_UART_Init();
   MX_ADC1_Init();
   MX_USB_OTG_FS_PCD_Init();
   /* USER CODE BEGIN 2 */
@@ -101,6 +106,35 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+		if (UART_Message)
+		{
+			uint8_t str_len = Buff_Size - __HAL_DMA_GET_COUNTER(&hdma_usart3_rx);
+			HAL_UART_Receive_DMA(&huart3, Receive_buff, Buff_Size - 1);
+			memset(Receive_buff+str_len-1, 0, Buff_Size-str_len);
+			UART_Message = 0;
+			if ((Receive_buff[0] == 't' || Receive_buff[0] == 'T') && Receive_buff[1] == ' ' && (Receive_buff[2] == 'm' || Receive_buff[2] == 'M') &&
+					(Receive_buff[3] == 'c' || Receive_buff[3] == 'C') && (Receive_buff[4] == 'u' || Receive_buff[4] == 'U') && Receive_buff[5] == '?')
+			{
+				//TODO temp mcu
+			}
+			else if ((Receive_buff[0] == 'v' || Receive_buff[0] == 'V') && Receive_buff[1] == ' ' && (Receive_buff[2] == 'r' || Receive_buff[2] == 'R') &&
+					(Receive_buff[3] == 'e' || Receive_buff[3] == 'E') && (Receive_buff[4] == 'f' || Receive_buff[4] == 'F') && Receive_buff[5] == '?')
+			{
+				//TODO vref
+			}
+			else if ((Receive_buff[0] == 'a' || Receive_buff[0] == 'A') && (Receive_buff[1] == 'l' || Receive_buff[1] == 'L') && (Receive_buff[2] == 'l' || Receive_buff[2] == 'L') &&
+					Receive_buff[3] == ' ' && (Receive_buff[4] == 's' || Receive_buff[4] == 'S') && (Receive_buff[5] == 'e' || Receive_buff[5] == 'E') && (Receive_buff[6] == 'n' || Receive_buff[6] == 'N') &&
+					(Receive_buff[7] == 's' || Receive_buff[7] == 'S') && (Receive_buff[8] == 'e' || Receive_buff[8] == 'E') && Receive_buff[9] == '?')
+			{
+				//TODO both
+			}
+			else
+			{
+				HAL_UART_Transmit(&huart3, (uint8_t*)"Wrong command", strlen("Wrong command"), 0xFFFFFFFF);
+			}
+		}
+
 	  if (flashing)
 	  {
 			HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
@@ -167,7 +201,20 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+void UART_IRQHandler(UART_HandleTypeDef *huart)
+{
+		if(RESET != __HAL_UART_GET_FLAG(huart, UART_FLAG_IDLE))
+		{
+			__HAL_UART_CLEAR_IDLEFLAG(huart);
+			UART_IDLECallback(huart);
+		}
+}
 
+void UART_IDLECallback(UART_HandleTypeDef *huart)
+{
+	HAL_UART_DMAStop(huart);
+	UART_Message = 1;
+}
 /* USER CODE END 4 */
 
 /**
